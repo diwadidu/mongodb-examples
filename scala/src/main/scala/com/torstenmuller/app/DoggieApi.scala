@@ -4,6 +4,7 @@ import org.scalatra._
 import org.scalatra.json._
 import com.mongodb.casbah.Imports._
 import org.json4s.{DefaultFormats, Formats}
+//import com.torstenmuller.app.Dog
 
 
 class DoggieApi(mongo: MongoCollection) extends ScalaStack with JacksonJsonSupport {
@@ -14,8 +15,11 @@ class DoggieApi(mongo: MongoCollection) extends ScalaStack with JacksonJsonSuppo
 
   get("/") {
 
-    mongo.find()
+    for (rec <- mongo.find())
+      yield new Dog(rec)
+
   }
+
 
   def renderMongo = {
     case dbo: DBObject =>
@@ -28,5 +32,6 @@ class DoggieApi(mongo: MongoCollection) extends ScalaStack with JacksonJsonSuppo
       "[" + ls + "]"
 
   }: RenderPipeline
+
 
 }
