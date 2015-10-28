@@ -7,6 +7,7 @@ import org.json4s.{DefaultFormats, Formats}
 import com.mongodb.casbah.commons.MongoDBObject
 import org.bson.types.ObjectId
 
+
 class DoggieApi(mongo: MongoCollection) extends ScalaStack with JacksonJsonSupport {
 
   protected implicit val jsonFormats: Formats = DefaultFormats
@@ -16,6 +17,13 @@ class DoggieApi(mongo: MongoCollection) extends ScalaStack with JacksonJsonSuppo
   get("/") {
     for (rec <- mongo.find())
       yield this.toOutput(rec)
+  }
+
+
+  get("/:id") {
+
+    val q = MongoDBObject("_id" -> new ObjectId(params("id")))
+    this.toOutput(mongo.findOne(q).get)
   }
 
 
