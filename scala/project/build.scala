@@ -31,7 +31,8 @@ object ScalaBuild extends Build {
         "javax.servlet" % "javax.servlet-api" % "3.1.0" % "provided",
         "org.mongodb" %% "casbah" % "2.7.2",
         "org.json4s" %% "json4s-jackson" % "3.3.0",
-        "org.json4s" %% "json4s-mongo" % "3.3.0"
+        "org.json4s" %% "json4s-mongo" % "3.3.0",
+        "org.json4s" %% "json4s-native" % "3.3.0"
       )
     )
   )

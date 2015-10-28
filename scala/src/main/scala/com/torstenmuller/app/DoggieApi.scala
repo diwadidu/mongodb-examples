@@ -3,10 +3,16 @@ package com.torstenmuller.app
 import org.scalatra._
 import org.scalatra.json._
 import com.mongodb.casbah.Imports._
-import org.json4s.{DefaultFormats, Formats}
 import com.mongodb.casbah.commons.MongoDBObject
 import org.bson.types.ObjectId
 
+//import scala.util.parsing.json._
+
+import org.json4s.{DefaultFormats, Formats}
+//import org.json4s.native.JsonMethods._
+import org.json4s._
+import org.json4s.jackson.JsonMethods._
+import org.json4s.JsonAST._
 
 class DoggieApi(mongo: MongoCollection) extends ScalaStack with JacksonJsonSupport {
 
@@ -14,17 +20,36 @@ class DoggieApi(mongo: MongoCollection) extends ScalaStack with JacksonJsonSuppo
 
   override protected def renderPipeline = renderMongo orElse super.renderPipeline
 
+  before() {
+    contentType = formats("json")
+  }
+
+
+  /**
+   * Get a list of all the dogs in the database
+   */
   get("/") {
     for (rec <- mongo.find())
       yield this.toOutput(rec)
   }
 
 
+  /**
+   * Get a single dog by ID
+   */
   get("/:id") {
 
     val q = MongoDBObject("_id" -> new ObjectId(params("id")))
     this.toOutput(mongo.findOne(q).get)
   }
+
+
+  post("/") {
+    val rec = this.fromInput(request.body)
+    mongo.save(rec)
+    this.toOutput(rec)
+  }
+
 
 
   def renderMongo = {
@@ -39,6 +64,17 @@ class DoggieApi(mongo: MongoCollection) extends ScalaStack with JacksonJsonSuppo
 
   }: RenderPipeline
 
+
+  def fromInput(jsonString: String): MongoDBObject = {
+
+    val jsonObj = org.json4s.native.JsonMethods.parse(jsonString)
+
+    MongoDBObject(
+      "name" -> (jsonObj \ "name").extract[String],
+      "age" -> (jsonObj \ "age").extract[String],
+      "breed" -> (jsonObj \ "breed").extract[String]
+    )
+  }
 
 
   def toOutput(record: DBObject): DBObject = {
