@@ -6,11 +6,9 @@ import com.mongodb.casbah.Imports._
 import com.mongodb.casbah.commons.MongoDBObject
 import org.bson.types.ObjectId
 
-//import scala.util.parsing.json._
-
 import org.json4s.{DefaultFormats, Formats}
-//import org.json4s.native.JsonMethods._
 import org.json4s._
+import org.json4s.JsonDSL._
 import org.json4s.jackson.JsonMethods._
 import org.json4s.JsonAST._
 
@@ -44,10 +42,28 @@ class DoggieApi(mongo: MongoCollection) extends ScalaStack with JacksonJsonSuppo
   }
 
 
+  put("/:id") {
+
+    val rec = this.fromInput(request.body)
+    val id = MongoDBObject("_id" -> new ObjectId(params("id")))
+    mongo.update(id, rec)
+    "message" -> (rec.as[String]("name") + " has been updated")
+  }
+
+
+  delete("/:id") {
+
+    val id = MongoDBObject("_id" -> new ObjectId(params("id")))
+    mongo.remove(id)
+    "message" -> "Dog has been removed"
+  }
+
+
   post("/") {
     val rec = this.fromInput(request.body)
     mongo.save(rec)
     this.toOutput(rec)
+    "message" -> (rec.as[String]("name") + " has been added")
   }
 
 
